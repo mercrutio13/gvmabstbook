@@ -13,6 +13,9 @@
 \RequirePackage{graphicx}
 
 \RequirePackage{texdate}
+\nameddateformat{coverDateFormat}{e\ b\ Y}
+\nameddateformat{ToCDateFormat}{A,\ e\ B}
+\nameddateformat{bookDateFormat}{A,\ e\ B}
 
 \RequirePackage[hidelinks]{hyperref} %
 
@@ -47,7 +50,6 @@
 		\renewcommand*{\@confImage}{#4}
 		\initdate{#5}{#6}{#7}
 		\savedate{confStartDate}
-		\def\setdateformat{e\ b\ Y}
 		\renewcommand*{\@confDateRange}{#8}
 	}
 
@@ -149,10 +151,10 @@
 			\vspace*{0.5cm}
 			
 			\large \@confLocation \\ 
-			\printdate 
+			\printfdate{coverDateFormat} 
 			\DTLadd{\@tempRange}{\@confDateRange}{-1}
 			\advancebydays{\@tempRange} 
-			- \printdate
+			- \printfdate{coverDateFormat}
 			\restoredate{confStartDate}
 		\end{center}
 	\end{titlepage}
@@ -188,14 +190,14 @@
 	{\huge\textbf{Schedule}} \vspace*{.5cm}
 	
 	\DTLconverttodecimal{0}{\daycount}
-	\restoredate{confStartDate}
-	\def\setdateformat{A, e\ B\ Y}
+	\restoredate{confStartDate}	
+	
 	\begin{tabular}{r p{.8\linewidth}}
 	\DTLforeach{speakers}{\name=Name,\tday=Day,\title=Title,\time=Time,\filename=Filename,\u=UID}{
 		\DTLifnumgt{\tday}{\daycount}{			
 			\end{tabular}
 				\vspace*{-1cm}
-				\subsection*{\underline\printdate}
+				\subsection*{\underline{\printfdate{ToCDateFormat}}}
 				\advancebydays{1}
 				\DTLadd{\daycount}{\daycount}{1}
 				\vspace*{-.2cm}
@@ -253,7 +255,6 @@
 	\DTLsort{Day,Time}{speakers} % leave database in chronological order
 	\DTLconverttodecimal{0}{\daycount}
 	\restoredate{confStartDate}
-	\def\setdateformat{A,\ e\ B\ Y}
 	
 	\DTLforeach{speakers}{\u=UID,\f=First,\m=Middle,\s=Surname,\tday=Day,\time=Time,\filename=Filename}{
 		\DTLifnumgt{\tday}{\daycount}{
@@ -293,7 +294,7 @@
 
 \newcommand{\@printday}{
 	\clearpage
-	\textsc{\LARGE\printdate}
+	\textsc{\LARGE\printfdate{bookDateFormat}}
 	\advancebydays{1}
 	
 	\centerline{\rule{\linewidth}{.2pt}}
