@@ -12,7 +12,7 @@
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
 
-\RequirePackage[showdow,en-AU,useregional=numeric]{datetime2}
+\RequirePackage[calc,en-AU]{datetime2}
 \DTMlangsetup{dowdaysep={,\ }}
 
 \RequirePackage[hidelinks]{hyperref} %
@@ -34,7 +34,7 @@
 %%%%%%	Variables and Accessors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	\newcommand{\@defaultTitleImageSize}{4cm}
+	\newcommand{\@confImageWidth}{4cm}
 
 	\newcommand*{\@confTitle}{}
 	\newcommand*{\@confSubTitle}{}
@@ -46,7 +46,8 @@
 	\newcommand*{\@confDays}{01}
 	\newcommand*{\@confDatestring}{0001-01-01}
 	
-	\newcommand{\@setConfData}[8]{
+	\newcommand{\setConfData}[8]{
+	
 		\renewcommand{\@confTitle}{#1}
 		\renewcommand{\@confSubTitle}{#2}
 		\renewcommand*{\@confLocation}{#3}
@@ -135,9 +136,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%	Make titlepage
 
-\newcommand{\makeConfTitle}[9][\@defaultTitleImageSize]{
-
-	\@setConfData{#2}{#3}{#4}{#5}{#6}{#7}{#8}{#9}
+\newcommand{\makeConfTitle}{
+	
 	\begin{titlepage}
 		\begin{center}	        
 	        
@@ -151,11 +151,12 @@
 			
 			\vfill
 			
-			\makebox[\textwidth]{\includegraphics[width={#1}]{images/\@confImage}}
+			\makebox[\textwidth]{\includegraphics[width={\@confImageWidth}]{images/\@confImage}}
 			
 			\vspace*{0.5cm}
 			
 			\large \@confLocation \\ 
+			\DTMsetregional[numeric]
 			\DTMDate{\@confDatestring} - \DTMDate{\@confDatestring+\@confDays}
 		\end{center}
 	\end{titlepage}
@@ -173,20 +174,37 @@
 	\@makeCronToC
 }
 
+\newcommand{\@ToCWidthScale}{.7}
+
 \newcommand{\@makeAlphaToC}{
 	\clearpage
 	\DTLsort{Surname}{speakers} % alphabetical order
 	
 	{\huge\textbf{List of Abstracts}} \vspace*{.5cm}
 	
-	\DTLforeach{speakers}{\name=Name,\title=Title,\u=UID}{
-		\@printToCLine{\name}{\title}{\u}
-	}
+%	\begin{center}
+	\hspace*{.75cm}\parbox{\dimexpr\@ToCWidthScale\linewidth+2cm\relax	}{
+		\DTLforeach{speakers}{\name=Name,\title=Title,\u=UID}{
+			\@printToCLine{\name}{\title}{\u}
+		}}
+%	\end{center}
+}
+
+\newcommand{\@printToCLine}[3]{ % modify for custom line formats, eg. for \makeCronToC
+	\hyperref[#3]{
+		\hspace*{-1cm}\textbf{#1} \\
+		\textit{#2}} \dotfill \pageref{#3}
+		
+	\vspace*{4pt}
 }
 
 \newcommand{\@makeCronToC}{
 	\clearpage
+	
 	\DTMsetstyle{en-AU}
+	\DTMsetup{showdow=true}
+	\DTMlangsetup{dowdaysep={,\ },ord=raise,showyear=false}
+	
 	\DTLsort{Day,Time}{speakers} % alphabetical order
 	
 	{\huge\textbf{Schedule}} \vspace*{.5cm}
@@ -194,30 +212,20 @@
 	\DTLconverttodecimal{0}{\daycount}
 %	\restoredate{confStartDate}	
 	
-	\begin{tabular}{r p{.8\linewidth}}
+	\begin{tabular}{r p{\@ToCWidthScale\linewidth}}
 	\DTLforeach{speakers}{\name=Name,\tday=Day,\title=Title,\time=Time,\filename=Filename,\u=UID}{
 		\DTLifnumgt{\tday}{\daycount}{ %if new day has begun	
 			\end{tabular} % break out of table
-				\vspace*{-1cm}
-				\subsection*{\@adjustedDTMDateUL{\daycount}}
+				\vspace*{-.2cm} \newline
+				\textbf{\large\@adjustedDTMDateUL{\daycount}} \newline
 				\DTLadd{\daycount}{\daycount}{1}
-				\vspace*{-.2cm}
-			\begin{tabular}{r p{.9\linewidth}}
+				\vspace*{-.2cm} \newline
+			\begin{tabular}{r p{\@ToCWidthScale\linewidth}}
 		}{}
 		\hyperref[\u]{\time} & \hyperref[\u]{\textbf{\name}} \\
 		& \hyperref[\u]{\textit{\title}} \\
 	}
 	\end{tabular}
-}
-
-\newcommand{\@printToCLine}[3]{ % modify for custom line formats, eg. for \makeCronToC
-	
-	\hyperref[#3]{
-	\hspace*{-1cm}\textbf{#1} \\
-	\textit{#2} \dotfill
-	} \pageref{#3}
-		
-	\vspace{4pt}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,7 +287,7 @@
 	\textit{\@Affil}\hfill \time \hspace*{1cm}
 	
 	\vspace{.2cm}
-	\noindent{\large\textbf{\@Title}}
+	\hspace*{-.5cm}\parbox{.9\textwidth}{\large\textbf{\@Title}}
 		
 	\DTLifnullorempty{\@Abst}{
 		\vspace*{.25cm}	
