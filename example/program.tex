@@ -2,16 +2,17 @@
 \usepackage{amssymb}
 
 \makecsvdatabase{speakers.csv}
-
-\begin{document}
-\makeConfTitle{A Conference in Excellence}
+\setConfData{A Conference in Excellence}
 	{The subtitle of which provokes thought}
 	{Hometown, Country}
 	{titleimage}
 	{1992}{11}{10}{5}
+
+\begin{document}
 	
-\makeToC
-\makeabstbook
-\maketimetable
+	\makeConfTitle
+	\makeToC
+	\makeabstbook
+	\maketimetable
 
 \end{document}
