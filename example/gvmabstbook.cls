@@ -12,10 +12,8 @@
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
 
-\RequirePackage{texdate}
-\nameddateformat{coverDateFormat}{e\ b\ Y}
-\nameddateformat{ToCDateFormat}{A,\ e\ B}
-\nameddateformat{bookDateFormat}{A,\ e\ B}
+\RequirePackage[showdow,en-AU,useregional=numeric]{datetime2}
+\DTMlangsetup{dowdaysep={,\ }}
 
 \RequirePackage[hidelinks]{hyperref} %
 
@@ -42,15 +40,23 @@
 	\newcommand*{\@confSubTitle}{}
 	\newcommand*{\@confLocation}{}
 	\newcommand*{\@confImage}{}
-	\newcommand*{\@confDateRange}{}
+	\newcommand*{\@confYear}{0001}
+	\newcommand*{\@confMonth}{01}
+	\newcommand*{\@confDay}{01}
+	\newcommand*{\@confDays}{01}
+	\newcommand*{\@confDatestring}{0001-01-01}
+	
 	\newcommand{\@setConfData}[8]{
 		\renewcommand{\@confTitle}{#1}
 		\renewcommand{\@confSubTitle}{#2}
 		\renewcommand*{\@confLocation}{#3}
 		\renewcommand*{\@confImage}{#4}
-		\initdate{#5}{#6}{#7}
-		\savedate{confStartDate}
-		\renewcommand*{\@confDateRange}{#8}
+		
+		\renewcommand*{\@confYear}{#5}
+		\renewcommand*{\@confMonth}{#6}
+		\renewcommand*{\@confDay}{#7}
+		\renewcommand*{\@confDays}{#8}
+		\renewcommand*{\@confDatestring}{#5-#6-#7}
 	}
 
 	\newcommand*{\@fName}{}
@@ -124,7 +130,6 @@
 		}
 	}
 	\DTLdeletedb{speakcsv} % to unload import database
-%	\DTLsort{Day,Time}{speakers} % leave database in chronological order
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,11 +156,7 @@
 			\vspace*{0.5cm}
 			
 			\large \@confLocation \\ 
-			\printfdate{coverDateFormat} 
-			\DTLadd{\@tempRange}{\@confDateRange}{-1}
-			\advancebydays{\@tempRange} 
-			- \printfdate{coverDateFormat}
-			\restoredate{confStartDate}
+			\DTMDate{\@confDatestring} - \DTMDate{\@confDatestring+\@confDays}
 		\end{center}
 	\end{titlepage}
 	
@@ -185,20 +186,20 @@
 
 \newcommand{\@makeCronToC}{
 	\clearpage
+	\DTMsetstyle{en-AU}
 	\DTLsort{Day,Time}{speakers} % alphabetical order
 	
 	{\huge\textbf{Schedule}} \vspace*{.5cm}
 	
 	\DTLconverttodecimal{0}{\daycount}
-	\restoredate{confStartDate}	
+%	\restoredate{confStartDate}	
 	
 	\begin{tabular}{r p{.8\linewidth}}
 	\DTLforeach{speakers}{\name=Name,\tday=Day,\title=Title,\time=Time,\filename=Filename,\u=UID}{
-		\DTLifnumgt{\tday}{\daycount}{			
-			\end{tabular}
+		\DTLifnumgt{\tday}{\daycount}{ %if new day has begun	
+			\end{tabular} % break out of table
 				\vspace*{-1cm}
-				\subsection*{\underline{\printfdate{ToCDateFormat}}}
-				\advancebydays{1}
+				\subsection*{\@adjustedDTMDateUL{\daycount}}
 				\DTLadd{\daycount}{\daycount}{1}
 				\vspace*{-.2cm}
 			\begin{tabular}{r p{.9\linewidth}}
@@ -254,11 +255,10 @@
 	\newgeometry{margin=1.25in}
 	\DTLsort{Day,Time}{speakers} % leave database in chronological order
 	\DTLconverttodecimal{0}{\daycount}
-	\restoredate{confStartDate}
 	
 	\DTLforeach{speakers}{\u=UID,\f=First,\m=Middle,\s=Surname,\tday=Day,\time=Time,\filename=Filename}{
 		\DTLifnumgt{\tday}{\daycount}{
-			\@printday
+			\@newDay{\daycount}
 			\DTLadd{\daycount}{\daycount}{1}
 		}{}
 		
@@ -292,10 +292,9 @@
 	}
 }
 
-\newcommand{\@printday}{
+\newcommand{\@newDay}[1]{
 	\clearpage
-	\textsc{\LARGE\printfdate{bookDateFormat}}
-	\advancebydays{1}
+	\textsc{\LARGE{\@adjustedDTMDate{#1}}}
 	
 	\centerline{\rule{\linewidth}{.2pt}}
 	\vspace{.25cm}
@@ -316,6 +315,22 @@
  		\addtolength{\myheight}{\mydepth}%
 		\noindent\makebox[0pt]{\hspace{-20pt}\rule[-\mydepth]{1pt}{\myheight}}%
 		\usebox{\mybox}}
+		
+\newcommand{\@adjustedDTMDate}[1]{
+	\DTLifnumgt{\daycount}{0}{
+		\DTMDate{\@confDatestring+#1} % print date
+	}{
+		\DTMDate{\@confDatestring} % exceptional case for day 0
+	}
+}
+
+\newcommand{\@adjustedDTMDateUL}[1]{
+	\DTLifnumgt{\daycount}{0}{
+		\underline{\DTMDate{\@confDatestring+#1}} % print date
+	}{
+		\underline{\DTMDate{\@confDatestring}} % exceptional case for day 0
+	}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%	Misc TEMPORARY Tools ---- COMMENT BEFORE FINAL (TODO, optional arg)
