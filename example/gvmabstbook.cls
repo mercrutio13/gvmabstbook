@@ -14,7 +14,7 @@
 
 \RequirePackage{texdate}
 
-\RequirePackage{hyperref} %
+\RequirePackage[hidelinks]{hyperref} %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%	kvoptions Setup
@@ -165,7 +165,7 @@
 %%%%%%	Make ToC
 
 \newcommand{\makeToC}{
-	\newgeometry{margin=1in}
+	\newgeometry{margin=2cm}
 	\@makeAlphaToC
 	\@makeCronToC
 }
@@ -201,7 +201,7 @@
 				\vspace*{-.2cm}
 			\begin{tabular}{r p{.9\linewidth}}
 		}{}
-		\time & \textbf{\name} \\
+		\hyperref[\u]{\time} & \hyperref[\u]{\textbf{\name}} \\
 		& \hyperref[\u]{\textit{\title}} \\
 	}
 	\end{tabular}
@@ -209,8 +209,10 @@
 
 \newcommand{\@printToCLine}[3]{ % modify for custom line formats, eg. for \makeCronToC
 	
-	\noindent{\textbf{#1}} \\
-	\hspace*{.5cm}\hyperref[#3]{\textit{#2}} \dotfill \pageref{#3}
+	\hyperref[#3]{
+	\hspace*{-1cm}\textbf{#1} \\
+	\textit{#2} \dotfill
+	} \pageref{#3}
 		
 	\vspace{4pt}
 }
